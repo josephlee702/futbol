@@ -165,4 +165,34 @@ RSpec.describe StatTracker do
       end 
     end
   end
+
+  context 'Team Statistic Methods' do
+    describe '#team_info' do 
+      it 'will return a hash of team info' do
+        expect(stat_tracker.team_info(1)).to be_a(Hash)
+        expect(stat_tracker.team_info(1)).to eq(:abbreviation=>"ATL", :franchiseid=>23, :link=>"/api/v1/teams/1", :team_id=>1, :teamname=>"Atlanta United")
+      end
+    end
+
+    describe '#best_season' do 
+      it 'will return the season with the highest win percentage for a team' do
+        expect(stat_tracker.best_season(6)).to be_a(String)
+        expect(stat_tracker.best_season(6)).to eq()
+      end
+    end
+
+    describe '#worst_season' do 
+      it 'will return the season with the lowest win percentage for a team' do
+        expect(stat_tracker.worst_season()).to be_a(String)
+        expect(stat_tracker.worst_season()).to eq()
+      end
+    end
+
+    describe '#average_win_percentage' do 
+      it 'will return the average win percentage of all games for a team' do
+        expect(stat_tracker.average_win_percentage()).to be_a(Float)
+        expect(stat_tracker.average_win_percentage()).to eq()
+      end
+    end
+  end
 end 

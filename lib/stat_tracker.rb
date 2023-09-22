@@ -442,4 +442,73 @@ class StatTracker
     end
     tackles_by_team.min.first
   end
+
+#Team Statistic Methods
+  def team_info(team_id)
+    team_info = Hash.new(0)
+    @teams.find do |team|
+      if team_id == team.team_id
+        # require 'pry'; binding.pry
+        team_info[:team_id] = team.team_id
+        team_info[:franchiseid] = team.franchise_id
+        team_info[:teamname] = team.name
+        team_info[:abbreviation] = team.abbreviation
+        team_info[:link] = team.link
+      else
+        p "Cannot find that team"
+      end
+    end
+    team_info
+  end
+
+  def best_season(team_id)
+    #create a hash of season and win percentage as key value pairs
+    season_win_percentages = Hash.new(0)
+    season_games = @games.find_all { |game| team_id == game.away_team_id || game.home_team_id}
+    season_games = season_games.map do |game|
+      game.game_id
+    end
+    #find all the wins of a team in a season
+    win_in_season = 0
+    @game_teams.each do |game_team|
+      if game_team.result == "WIN" && season_games.include?(game_team.game_id && team_id == game.team_id)
+        season_win_percentages[@game_team.season] += 1
+      end
+      require 'pry'; binding.pry
+    end
+    #find total number of games a team played in a season
+
+
+    # season_games = @game_teams.find_all { |game| game.team_id == team_id }
+    # season_games = season_games.map do |game|
+    #   game.game_id
+    # end
+    # @game_teams.each do |game_team|
+    #   if game_team.result == "WIN" && season_games.include?(game_team.game_id)
+    #     coach_wins[game_team.head_coach] += 1
+    #   end
+    # end
+    # #number of games played by each coach's team
+    # coach_total_games = Hash.new(0)
+    # @game_teams.each do |game_team|
+    #   if season_games.include?(game_team.game_id)
+    #     coach_total_games[game_team.head_coach] += 1
+    #   end
+    # end
+    # #now we divide each coach's wins by the number of games their team played
+    # coach_win_percentage = {}
+    # coach_wins.each do |coach, wins|
+    #   coach_win_percentage[coach] = (wins.to_f/coach_total_games[coach].to_f)
+    # end
+    # winningest_coach = coach_win_percentage.find{ |key, value| value  == coach_win_percentage.values.max }
+    # winningest_coach.first
+  end
+
+  def worst_season(team_id)
+
+  end
+
+  def average_win_percentage(team_id)
+
+  end
 end
