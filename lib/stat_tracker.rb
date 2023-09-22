@@ -316,6 +316,9 @@ class StatTracker
     @game_teams.each do |game_team|
       if game_team.result == "WIN" && season_games.include?(game_team.game_id)
         coach_wins[game_team.head_coach] += 1
+      elsif season_games.include?(game_team.game_id)
+        coach_wins[game_team.head_coach] += 0
+      else
       end
     end
     #number of games played by each coach's team
@@ -335,24 +338,35 @@ class StatTracker
   end
 
   def worst_coach(season)
-    coach_losses = Hash.new(0)
-    season_games = @games.find_all { |game| game.season == season }
-    season_games = season_games.map do |game|
-      game.game_id
-    end
-    @game_teams.each do |game_team|
-      if game_team.result == "LOSS" && season_games.include?(game_team.game_id)
-        coach_losses[game_team.head_coach] += 1
-      end
-    end
-    #number of games played by each coach's team
-    coach_total_games = Hash.new(0)
-    @game_teams.each { |game_team| coach_total_games[game_team.head_coach] += 1 }
-    #now we divide each coach's wins by the number of games their team played
-    coach_loss_percentage = {}
-    coach_losses.each { |coach, losses| coach_loss_percentage[coach] = (losses.to_f/coach_total_games[coach].to_f) }
-    worst_coach = coach_loss_percentage.find{ |key, value| value  == coach_loss_percentage.values.max }
-    worst_coach.first
+     #number of wins for each coach
+     coach_wins = Hash.new(0)
+     #opportunity here to create a helper method (to find all games in a season) and just call that
+     season_games = @games.find_all { |game| game.season == season }
+     season_games = season_games.map do |game|
+       game.game_id
+     end
+     @game_teams.each do |game_team|
+       if game_team.result == "WIN" && season_games.include?(game_team.game_id)
+         coach_wins[game_team.head_coach] += 1
+       elsif season_games.include?(game_team.game_id)
+         coach_wins[game_team.head_coach] += 0
+       else
+       end
+     end
+     #number of games played by each coach's team
+     coach_total_games = Hash.new(0)
+     @game_teams.each do |game_team|
+       if season_games.include?(game_team.game_id)
+         coach_total_games[game_team.head_coach] += 1
+       end
+     end
+     #now we divide each coach's wins by the number of games their team played
+     coach_win_percentage = {}
+     coach_wins.each do |coach, wins|
+       coach_win_percentage[coach] = (wins.to_f/coach_total_games[coach].to_f)
+     end
+     worst_coach = coach_win_percentage.find{ |key, value| value  == coach_win_percentage.values.min }
+     worst_coach.first
   end
 
   def most_accurate_team(season)
@@ -448,7 +462,6 @@ class StatTracker
     team_info = Hash.new(0)
     @teams.find do |team|
       if team_id == team.team_id
-        # require 'pry'; binding.pry
         team_info[:team_id] = team.team_id
         team_info[:franchiseid] = team.franchise_id
         team_info[:teamname] = team.name
@@ -462,53 +475,86 @@ class StatTracker
   end
 
   def best_season(team_id)
-    #create a hash of season and win percentage as key value pairs
     season_win_percentages = Hash.new(0)
-    season_games = @games.find_all { |game| team_id == game.away_team_id || game.home_team_id}
+    #this gives all the games that the team was part of
+    season_games = @game_teams.find_all { |game| team_id == game.team_id }
+    #this gives an array of all game ids they played
     season_games = season_games.map do |game|
       game.game_id
     end
     #find all the wins of a team in a season
-    win_in_season = 0
+    total_wins = Hash.new(0)
     @game_teams.each do |game_team|
-      if game_team.result == "WIN" && season_games.include?(game_team.game_id && team_id == game.team_id)
-        season_win_percentages[@game_team.season] += 1
+      if team_id == game_team.team_id && game_team.result == "WIN" && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+            total_wins[game.season] += 1
+          end
+        end
       end
-      require 'pry'; binding.pry
     end
-    #find total number of games a team played in a season
-
-
-    # season_games = @game_teams.find_all { |game| game.team_id == team_id }
-    # season_games = season_games.map do |game|
-    #   game.game_id
-    # end
-    # @game_teams.each do |game_team|
-    #   if game_team.result == "WIN" && season_games.include?(game_team.game_id)
-    #     coach_wins[game_team.head_coach] += 1
-    #   end
-    # end
-    # #number of games played by each coach's team
-    # coach_total_games = Hash.new(0)
-    # @game_teams.each do |game_team|
-    #   if season_games.include?(game_team.game_id)
-    #     coach_total_games[game_team.head_coach] += 1
-    #   end
-    # end
-    # #now we divide each coach's wins by the number of games their team played
-    # coach_win_percentage = {}
-    # coach_wins.each do |coach, wins|
-    #   coach_win_percentage[coach] = (wins.to_f/coach_total_games[coach].to_f)
-    # end
-    # winningest_coach = coach_win_percentage.find{ |key, value| value  == coach_win_percentage.values.max }
-    # winningest_coach.first
+    #find the total games a team played in a season
+    total_games = Hash.new(0)
+    games_played = 0
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+          total_games[game.season] += 1
+          end
+        end
+      end
+    end
+    #now we have to divide the wins by total games played in a season
+    team_win_percentage_by_season = {}
+    total_wins.each do |season, wins|
+      team_win_percentage_by_season[season] = (wins.to_f / total_games[season].to_f)
+    end
+    index = team_win_percentage_by_season.values.max
+    season_most_wins = team_win_percentage_by_season.key(index).to_s
   end
 
   def worst_season(team_id)
-
+    season_win_percentages = Hash.new(0)
+    #this gives all the games that the team was part of
+    season_games = @game_teams.find_all { |game| team_id == game.team_id }
+    #this gives an array of all game ids they played
+    season_games = season_games.map do |game|
+      game.game_id
+    end
+    #find all the wins of a team in a season
+    total_wins = Hash.new(0)
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && game_team.result == "WIN" && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+            total_wins[game.season] += 1
+          end
+        end
+      end
+    end
+    #find the total games a team played in a season
+    total_games = Hash.new(0)
+    games_played = 0
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+          total_games[game.season] += 1
+          end
+        end
+      end
+    end
+    #now we have to divide the wins by total games played in a season
+    team_win_percentage_by_season = {}
+    total_wins.each do |season, wins|
+      team_win_percentage_by_season[season] = (wins.to_f / total_games[season].to_f)
+    end
+    index = team_win_percentage_by_season.values.min
+    season_least_wins = team_win_percentage_by_season.key(index).to_s
   end
 
-  def average_win_percentage(team_id)
+  # def average_win_percentage(team_id)
 
-  end
+  # end
 end
