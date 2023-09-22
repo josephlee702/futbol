@@ -1,4 +1,7 @@
 require "csv"
+require_relative './team'
+require_relative './game'
+require_relative './game_teams'
 class StatTracker
   attr_reader :teams,
               :games,
@@ -306,6 +309,7 @@ class StatTracker
   
 #Season Statistic Methods
   def winningest_coach(season)
+    season = season.to_i
     #number of wins for each coach
     coach_wins = Hash.new(0)
     #opportunity here to create a helper method (to find all games in a season) and just call that
@@ -335,6 +339,7 @@ class StatTracker
   end
 
   def worst_coach(season)
+    season = season.to_i
     coach_losses = Hash.new(0)
     season_games = @games.find_all { |game| game.season == season }
     season_games = season_games.map do |game|
@@ -356,6 +361,7 @@ class StatTracker
   end
 
   def most_accurate_team(season)
+    season = season.to_i
     accuracy_by_team = {}
     #sets team names to keys
     @teams.each do |team|
@@ -380,6 +386,7 @@ class StatTracker
   end
 
   def least_accurate_team(season)
+    season = season.to_i
     accuracy_by_team = {}
     #sets team names to keys
     @teams.each do |team|
@@ -404,6 +411,7 @@ class StatTracker
   end
 
   def most_tackles(season)
+    season = season.to_i
     tackles_by_team = {}
     @teams.each do |team|
       season_games = @games.find_all { |game| game.season == season}
@@ -424,6 +432,7 @@ class StatTracker
   end
 
   def fewest_tackles(season)
+    season = season.to_i
     tackles_by_team = {}
     @teams.each do |team|
       season_games = @games.find_all { |game| game.season == season}
@@ -441,5 +450,105 @@ class StatTracker
       end
     end
     tackles_by_team.min.first
+  end
+
+  def most_goals_scored(team_id)
+    team_array = @game_teams.find_all do |game|
+      game.team_id == team_id
+    end
+    team_game_goals = team_array.map do |game|
+      game.goals
+    end
+    team_game_goals.max
+  end
+
+  def fewest_goals_scored(team_id)
+    team_array = @game_teams.find_all do |game|
+      game.team_id == team_id
+    end
+    team_game_goals = team_array.map do |game|
+      game.goals
+    end
+    team_game_goals.min
+  end
+
+  def favorite_opponent(team_id)
+    hash = Hash.new{ |hash, key| hash[key] = [] }
+    only_team_games = @games.find_all do |game|
+      game.away_team_id == team_id || game.home_team_id == team_id
+    end
+    only_team_games.each do |game|
+      win = 0
+      loss = 0
+      if game.away_team_id == team_id && game.away_goals > game.home_goals
+        key = game.home_team_id
+        loss += 1
+      elsif game.away_team_id == team_id && game.away_goals < game.home_goals
+        key = game.home_team_id
+        win += 1
+      elsif game.home_team_id == team_id && game.home_goals > game.away_goals
+        key = game.away_team_id
+        loss += 1
+      else game.home_team_id == team_id && game.home_goals < game.away_goals
+        key = game.away_team_id
+        win += 1
+      end
+      hash[key] << [win, loss]
+    end
+    transpo = hash.map { |key, value| value.transpose}
+    sum_array = transpo.map do |a|
+      [a[0].sum, a[1].sum]
+    end
+    avg = sum_array.map do |b|
+      (b[0].to_f / (b[1].to_f + b[0].to_f))
+    end
+    min = avg.min
+    index = avg.find_index(min)
+    best_opponent = hash.keys[index]
+    team_code = best_opponent
+    @x = @teams.find do |team|
+      team.team_id == team_code
+    end
+    @x.name
+  end
+
+  def rival(team_id)
+    hash = Hash.new{ |hash, key| hash[key] = [] }
+    only_team_games = @games.find_all do |game|
+      game.away_team_id == team_id || game.home_team_id == team_id
+    end
+    only_team_games.each do |game|
+      win = 0
+      loss = 0
+      if game.away_team_id == team_id && game.away_goals > game.home_goals
+        key = game.home_team_id
+        loss += 1
+      elsif game.away_team_id == team_id && game.away_goals < game.home_goals
+        key = game.home_team_id
+        win += 1
+      elsif game.home_team_id == team_id && game.home_goals > game.away_goals
+        key = game.away_team_id
+        loss += 1
+      else game.home_team_id == team_id && game.home_goals < game.away_goals
+        key = game.away_team_id
+        win += 1
+      end
+      hash[key] << [win, loss]
+    end
+    transpo = hash.map { |key, value| value.transpose}
+    sum_array = transpo.map do |a|
+      [a[0].sum, a[1].sum]
+    end
+    avg = sum_array.map do |b|
+      (b[0].to_f / (b[1].to_f + b[0].to_f))
+    end
+    max = avg.max
+    index = avg.find_index(max)
+    rival = hash.keys[index]
+    team_code = rival
+    @x = @teams.find do |team|
+      team.team_id == team_code
+    end
+    @x.name
   end
 end

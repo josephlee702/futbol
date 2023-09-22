@@ -163,6 +163,12 @@ RSpec.describe StatTracker do
         expect(stat_tracker.fewest_tackles(20122013)).to be_an(String)
         expect(stat_tracker.fewest_tackles(20122013)).to eq("FC Cincinnati")
       end 
+      it "will" do
+        expect(stat_tracker.most_goals_scored(3)).to eq(2)
+        expect(stat_tracker.fewest_goals_scored(3)).to eq(0)
+        expect(stat_tracker.favorite_opponent(3)).to eq("Portland Timbers")
+        expect(stat_tracker.rival(3)).to eq("FC Dallas")
+      end
     end
   end
 end 
