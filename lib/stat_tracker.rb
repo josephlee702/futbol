@@ -443,7 +443,10 @@ class StatTracker
         tackles_by_team[team.name] = tackles
       end
     end
-    tackles_by_team.max.first
+    max = tackles_by_team.values.max
+    index = tackles_by_team.values.find_index(max)
+    x = tackles_by_team.keys[index]
+    x
   end
 
   def fewest_tackles(season)
@@ -464,7 +467,10 @@ class StatTracker
         tackles_by_team[team.name] = tackles
       end
     end
-    tackles_by_team.min.first
+    min = tackles_by_team.values.min
+    index = tackles_by_team.values.find_index(min)
+    x = tackles_by_team.keys[index]
+    x
   end
 
   def most_goals_scored(team_id)
