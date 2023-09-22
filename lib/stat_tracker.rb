@@ -57,7 +57,7 @@ class StatTracker
       end
     end
     x = home_win / total_games
-    (x * 100).round(2)
+    x.round(2)
   end
 
   def percentage_visitor_wins
@@ -80,7 +80,7 @@ class StatTracker
       end
     end
     x = visitor_win / total_games
-    (x * 100).round(2)
+    x.round(2)
   end
 
   def percentage_ties
@@ -103,13 +103,13 @@ class StatTracker
       end
     end
     x = tie / total_games
-    (x * 100).round(2)
+    x.round(2)
   end
 
   def count_of_games_by_season
     games_per_season = Hash.new(0)
     @games.each do |game|
-      games_per_season[game.season] += 1
+      games_per_season[game.season.to_s] += 1
     end
     games_per_season
   end
@@ -129,19 +129,30 @@ class StatTracker
 
   def average_goals_by_season
     hash = Hash.new{ |hash, key| hash[key] = 0.00 }
-    total_goals = 0.00
-    total_games = 0.00
+    hash2 = Hash.new{ |hash, key| hash[key] = 0.00 }
     @games.each do |game|
-      key = game.season
-      value1 = game.away_goals
-      value2 = game.home_goals
-      total_games += 1.00
-      total_goals += value1
-      total_goals += value2
-      avg_goals_game = (total_goals / total_games)
-      hash[key] = avg_goals_game.round(2)
+      @game_count = 0.0
+      @home_goals = 0.0
+      @away_goals = 0.0
+      @game_count += 1.0
+      @home_goals += game.home_goals
+      @away_goals += game.away_goals
+      total_goals = @home_goals + @away_goals
+      @key = game.season
+      hash[@key.to_s] += total_goals
+      hash2[@key.to_s] += @game_count
     end
-    hash
+    hash_values = hash.values
+    hash2_values = hash2.values
+    avg_array = [hash_values, hash2_values].transpose.map {|x| x.reduce(:/).round(2)}
+    hash3 = {}
+    hash.keys.each do |key|
+      key = key
+      key_index = hash.keys.find_index(key)
+      key_value = avg_array[key_index]
+      hash3[key] = key_value
+    end
+    hash3
   end
   
   # League Statistic Methods
@@ -367,7 +378,7 @@ class StatTracker
     @teams.each do |team|
       season_games = @games.find_all { |game| game.season == season }
       season_games = season_games.map do |game|
-      game.game_id
+        game.game_id
       end
       goals = 0
       shots = 0
@@ -381,8 +392,10 @@ class StatTracker
         accuracy_by_team[team.name] = goals.to_f/shots.to_f
       end
     end
-    accuracy_by_team.max.first
-    #goals / shots is what we need
+    max = accuracy_by_team.values.max
+    index = accuracy_by_team.values.find_index(max)
+    x = accuracy_by_team.keys[index]
+    x
   end
 
   def least_accurate_team(season)
@@ -406,8 +419,10 @@ class StatTracker
         accuracy_by_team[team.name] = goals.to_f/shots.to_f
       end
     end
-    accuracy_by_team.min.first
-    #goals / shots is what we need
+    min = accuracy_by_team.values.min
+    index = accuracy_by_team.values.find_index(min)
+    x = accuracy_by_team.keys[index]
+    x
   end
 
   def most_tackles(season)
@@ -453,6 +468,7 @@ class StatTracker
   end
 
   def most_goals_scored(team_id)
+    team_id = team_id.to_i
     team_array = @game_teams.find_all do |game|
       game.team_id == team_id
     end
@@ -463,6 +479,7 @@ class StatTracker
   end
 
   def fewest_goals_scored(team_id)
+    team_id = team_id.to_i
     team_array = @game_teams.find_all do |game|
       game.team_id == team_id
     end
@@ -473,6 +490,7 @@ class StatTracker
   end
 
   def favorite_opponent(team_id)
+    team_id = team_id.to_i
     hash = Hash.new{ |hash, key| hash[key] = [] }
     only_team_games = @games.find_all do |game|
       game.away_team_id == team_id || game.home_team_id == team_id
@@ -513,6 +531,7 @@ class StatTracker
   end
 
   def rival(team_id)
+    team_id = team_id.to_i
     hash = Hash.new{ |hash, key| hash[key] = [] }
     only_team_games = @games.find_all do |game|
       game.away_team_id == team_id || game.home_team_id == team_id
@@ -542,6 +561,7 @@ class StatTracker
     avg = sum_array.map do |b|
       (b[0].to_f / (b[1].to_f + b[0].to_f))
     end
+    #require 'pry'; binding.pry
     max = avg.max
     index = avg.find_index(max)
     rival = hash.keys[index]
