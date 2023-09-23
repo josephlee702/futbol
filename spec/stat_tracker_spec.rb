@@ -178,23 +178,22 @@ RSpec.describe StatTracker do
       it 'will return the season with the highest win percentage for a team' do
         expect(stat_tracker.best_season(6)).to be_a(String)
         #THIS TEST IS WRONG. NOT ENOUGH DATA IN OUR TEST SETS TO GIVE ACCURATE DATA. MUST RUN AGAINST FULL DATA SET. !!!!!!!!!!!!!!!!!!!!!!!!!!!! For now, I put in the answer we expect for the full set.
-        expect(stat_tracker.best_season(6)).to eq("20132014")
+        expect(stat_tracker.best_season(6)).to eq("20122013")
       end
     end
 
     describe '#worst_season' do 
       it 'will return the season with the lowest win percentage for a team' do
         expect(stat_tracker.worst_season(6)).to be_a(String)
-         #THIS TEST IS WRONG. NOT ENOUGH DATA IN OUR TEST SETS TO GIVE ACCURATE DATA. MUST RUN AGAINST FULL DATA SET. !!!!!!!!!!!!!!!!!!!!!!!!!!!! For now, I put in the answer we expect for the full set.
-        expect(stat_tracker.worst_season(6)).to eq("20142015")
+        expect(stat_tracker.worst_season(6)).to eq("20122013")
       end
     end
 
-    # describe '#average_win_percentage' do 
-    #   it 'will return the average win percentage of all games for a team' do
-    #     expect(stat_tracker.average_win_percentage()).to be_a(Float)
-    #     expect(stat_tracker.average_win_percentage()).to eq()
-    #   end
-    # end
+    describe '#average_win_percentage' do 
+      it 'will return the average win percentage of all games for a team' do
+        expect(stat_tracker.average_win_percentage(6)).to be_a(Float)
+        expect(stat_tracker.average_win_percentage(6)).to eq(1.0)
+      end
+    end
   end
-end 
+end

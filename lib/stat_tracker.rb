@@ -517,10 +517,10 @@ class StatTracker
   def worst_season(team_id)
     season_win_percentages = Hash.new(0)
     #this gives all the games that the team was part of
-    season_games = @game_teams.find_all { |game| team_id == game.team_id }
+    season_games = @game_teams.find_all { |game_team| team_id == game_team.team_id }
     #this gives an array of all game ids they played
-    season_games = season_games.map do |game|
-      game.game_id
+    season_games = season_games.map do |game_team|
+      game_team.game_id
     end
     #find all the wins of a team in a season
     total_wins = Hash.new(0)
@@ -554,7 +554,18 @@ class StatTracker
     season_least_wins = team_win_percentage_by_season.key(index).to_s
   end
 
-  # def average_win_percentage(team_id)
-
-  # end
+  def average_win_percentage(team_id)
+    game_wins = 0
+    total_games = 0
+    @game_teams.each do |game_team| 
+      if team_id == game_team.team_id && game_team.result == "WIN"
+        game_wins += 1
+      end
+      if team_id == game_team.team_id 
+        total_games += 1
+      end
+    end
+    average_win_percentage = (game_wins.to_f / total_games.to_f).round(2)
+    average_win_percentage
+  end
 end
