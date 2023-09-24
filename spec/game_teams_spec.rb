@@ -7,8 +7,8 @@ RSpec.describe GameTeam do
   describe '#initialize' do 
     it 'exists' do 
       expect(game_team).to be_a(GameTeam)
-      expect(game_team.game_id).to eq(2012030221)
-      expect(game_team.team_id).to eq(3)
+      expect(game_team.game_id).to eq("2012030221")
+      expect(game_team.team_id).to eq("3")
       expect(game_team.hoa).to eq("away")
       expect(game_team.result).to eq("LOSS")
       expect(game_team.settled_in).to eq("OT")
