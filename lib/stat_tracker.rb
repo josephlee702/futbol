@@ -2,7 +2,10 @@ require "csv"
 require_relative './team'
 require_relative './game'
 require_relative './game_teams'
+require_relative './modules'
+
 class StatTracker
+  include HelperMethods
   attr_reader :teams,
               :games,
               :game_teams
@@ -132,101 +135,39 @@ class StatTracker
   end
 
   def best_offense
-    teams_goals_average = {}
-    @teams.each do |team|
-      total_games = 0
-      total_goals = 0
-      games = @game_teams.each do |game_team| 
-        if game_team.team_id == team.team_id
-          total_games +=1
-          total_goals += game_team.goals
-        end
-      end
-      if total_games > 0 && total_goals > 0
-        teams_goals_average["#{team.name}"] = (total_goals.to_f / total_games.to_f)
-      end
-    end
+    teams_goals_average = offensable
     best_offense = teams_goals_average.find { |team, avg| avg == teams_goals_average.values.max}
     best_offense.first
   end
 
   def worst_offense
-    teams_goals_average = {}
-    @teams.each do |team|
-      total_games = 0
-      total_goals = 0
-      games = @game_teams.each do |game_team| 
-        if game_team.team_id == team.team_id
-          total_games +=1
-          total_goals += game_team.goals
-        end
-      end
-      if total_games > 0 && total_goals
-      teams_goals_average["#{team.name}"] = (total_goals.to_f / total_games.to_f)
-      end
-    end
+    teams_goals_average = offensable
     worst_offense = teams_goals_average.find { |team, avg| avg == teams_goals_average.values.min}
     worst_offense.first
   end
 
   def highest_scoring_visitor
-    hash = Hash.new{ |hash, key| hash[key] = [] }
-    @game_teams.each do |game|
-      if game.hoa == "away"
-        total_goals = 0.00
-        total_games = 0.00
-        key = game.team_id
-        value1 = game.goals
-        total_games += 1.00
-        total_goals += value1
-        hash[key] << [value1, total_games]
-      end
-    end
-    transpo = hash.map { |key, value| value.transpose}
-    sum_array = transpo.map do |a|
-      [a[0].sum, a[1].sum]
-    end
-    avg = sum_array.map do |b|
-      b[0] / b[1]
-    end
-    max = avg.max
-    index = avg.find_index(max)
-    best_visitor = hash.keys[index]
+    avg = scorable
+    max = avg[0].max
+    index = avg[0].find_index(max)
+    best_visitor = avg[1].keys[index]
     team_code = best_visitor
-    @x = @teams.find do |team|
+    x = @teams.find do |team|
       team.team_id == team_code
     end
-    @x.name
+    x.name
   end
 
   def lowest_scoring_visitor
-    hash = Hash.new{ |hash, key| hash[key] = [] }
-    @game_teams.each do |game|
-      if game.hoa == "away"
-        total_goals = 0.00
-        total_games = 0.00
-        key = game.team_id
-        value1 = game.goals
-        total_games += 1.00
-        total_goals += value1
-        hash[key] << [value1, total_games]
-      end
-    end
-    transpo = hash.map { |key, value| value.transpose}
-    sum_array = transpo.map do |a|
-      [a[0].sum, a[1].sum]
-    end
-    avg = sum_array.map do |b|
-      b[0] / b[1]
-    end
-    min = avg.min
-    index = avg.find_index(min)
-    best_visitor = hash.keys[index]
+    avg = scorable
+    min = avg[0].min
+    index = avg[0].find_index(min)
+    best_visitor = avg[1].keys[index]
     team_code = best_visitor
-    @x = @teams.find do |team|
+    x = @teams.find do |team|
       team.team_id == team_code
     end
-    @x.name
+    x.name
   end
 
   def highest_scoring_home_team
