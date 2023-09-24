@@ -18,10 +18,10 @@ def offensable
     teams_goals_average
   end
 
-  def scorable
+  def scorable(hoa)
     hash = Hash.new{ |hash, key| hash[key] = [] }
     @game_teams.each do |game|
-      if game.hoa == "away"
+      if game.hoa == hoa
         total_goals = 0.00
         total_games = 0.00
         key = game.team_id
@@ -39,6 +39,39 @@ def offensable
       b[0] / b[1]
     end
     [avg, hash]
+  end
+
+  def season_game_idables(season)
+    season_games = @games.find_all { |game| game.season == season }
+    season_game_ids = season_games.map { |game| game.game_id }
+  end
+
+  def coachable(season_games)
+    #number of wins for each coach
+    coach_wins = Hash.new(0)
+    #opportunity here to create a helper method (to find all games in a season) and just call that
+    @game_teams.each do |game_team|
+      if game_team.result == "WIN" && season_games.include?(game_team.game_id)
+        coach_wins[game_team.head_coach] += 1
+      elsif season_games.include?(game_team.game_id)
+        coach_wins[game_team.head_coach] += 0
+      else
+
+      end
+    end
+    #number of games played by each coach's team
+    coach_total_games = Hash.new(0)
+    @game_teams.each do |game_team|
+      if season_games.include?(game_team.game_id)
+        coach_total_games[game_team.head_coach] += 1
+      end
+    end
+    #now we divide each coach's wins by the number of games their team played
+    coach_win_percentage = {}
+    coach_wins.each do |coach, wins|
+      coach_win_percentage[coach] = (wins.to_f/coach_total_games[coach].to_f)
+    end
+    coach_win_percentage
   end
 
 end
