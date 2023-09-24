@@ -160,5 +160,34 @@ def offensable
     team_game_goals
   end
 
+  def versusable(team_id)
+    team_games = @games.find_all do |game|
+      game.away_team_id == team_id || game.home_team_id == team_id
+    end
+    game_ids = team_games.map { |game| game.game_id}
+    team_games = @game_teams.find_all { |game| game_ids.include?(game.game_id) }
+    opponent_wins = Hash.new(0)
+    opponent_games = Hash.new(0)
+    team_wins = 0
+    team_games.each do |game|
+      if game.team_id != team_id && game.result == "WIN"
+        opponent_wins[game.team_id] += 1.0
+        opponent_games[game.team_id] += 1.0
+      elsif game.team_id != team_id
+        opponent_games[game.team_id] += 1.0
+        opponent_wins[game.team_id] += 0.0
+      elsif game.team_id != team_id && game.result == "TIE"
+        opponent_games[game.team_id] += 1.0
+        opponent_wins[game.team_id] += 0.0
+      end
+    end
+    opponent_win_percentage = {}
+    opponent_wins.map do |team_id, wins|
+      team = @teams.find { |team| team.team_id == team_id }
+      opponent_win_percentage[team.name] = (wins / opponent_games[team.team_id])
+    end
+    opponent_win_percentage
+  end
+
 end
 

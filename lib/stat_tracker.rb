@@ -286,61 +286,13 @@ class StatTracker
   end
   
   def favorite_opponent(team_id)
-    team_games = @games.find_all do |game|
-      game.away_team_id == team_id || game.home_team_id == team_id
-    end
-    game_ids = team_games.map { |game| game.game_id}
-    team_games = @game_teams.find_all { |game| game_ids.include?(game.game_id) }
-    opponent_wins = Hash.new(0)
-    opponent_games = Hash.new(0)
-    team_wins = 0
-    team_games.each do |game|
-      if game.team_id != team_id && game.result == "WIN"
-        opponent_wins[game.team_id] += 1.0
-        opponent_games[game.team_id] += 1.0
-      elsif game.team_id != team_id
-        opponent_games[game.team_id] += 1.0
-        opponent_wins[game.team_id] += 0.0
-      elsif game.team_id != team_id && game.result == "TIE"
-        opponent_games[game.team_id] += 1.0
-        opponent_wins[game.team_id] += 0.0
-      end
-    end
-    opponent_win_percentage = {}
-    opponent_wins.map do |team_id, wins|
-      team = @teams.find { |team| team.team_id == team_id }
-      opponent_win_percentage[team.name] = (wins / opponent_games[team.team_id])
-    end
+    opponent_win_percentage = versusable(team_id)
     favorite_opponent = opponent_win_percentage.find { |team, wins| wins == opponent_win_percentage.values.min }
     favorite_opponent.first
   end
 
   def rival(team_id)
-    team_games = @games.find_all do |game|
-      game.away_team_id == team_id || game.home_team_id == team_id
-    end
-    game_ids = team_games.map { |game| game.game_id}
-    team_games = @game_teams.find_all { |game| game_ids.include?(game.game_id) }
-    opponent_wins = Hash.new(0)
-    opponent_games = Hash.new(0)
-    team_wins = 0
-    team_games.each do |game|
-      if game.team_id != team_id && game.result == "WIN"
-        opponent_wins[game.team_id] += 1.0
-        opponent_games[game.team_id] += 1.0
-      elsif game.team_id != team_id
-        opponent_games[game.team_id] += 1.0
-        opponent_wins[game.team_id] += 0.0
-      elsif game.team_id != team_id && game.result == "TIE"
-        opponent_games[game.team_id] += 1.0
-        opponent_wins[game.team_id] += 0.0
-      end
-    end
-    opponent_win_percentage = {}
-    opponent_wins.map do |team_id, wins|
-      team = @teams.find { |team| team.team_id == team_id }
-      opponent_win_percentage[team.name] = (wins / opponent_games[team.team_id])
-    end
+    opponent_win_percentage = versusable(team_id)
     rival = opponent_win_percentage.find { |team, wins| wins == opponent_win_percentage.values.max }
     rival.first
   end
@@ -397,8 +349,8 @@ class StatTracker
   end
 
   # def seasonal_summary(team_id)
-  #   #For each season that the team has played, a hash that has two keys (:regular_season and :postseason), that each point to a hash with the following keys: :win_percentage, :total_goals_scored, :total_goals_against, :average_goals_scored, :average_goals_against. #Hash
-    
+  #For each season that the team has played, a hash that has two keys (:regular_season and :postseason), that each point to a hash with the following keys: :win_percentage, :total_goals_scored, :total_goals_against, :average_goals_scored, :average_goals_against. 
+  #Hash
   # end
 end
 
