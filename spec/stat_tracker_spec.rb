@@ -173,29 +173,57 @@ RSpec.describe StatTracker do
     context 'Team Statistics' do
       describe '#most_goals_scored' do 
         it 'will return highest number of goals a particular team has scored in a single game.' do 
-          expect(stat_tracker.most_goals_scored("3")).to eq(2)
           expect(stat_tracker.most_goals_scored("3")).to be_a(Integer)
+          expect(stat_tracker.most_goals_scored("3")).to eq(2)
         end
       end
 
       describe '#fewest_goals_scored' do 
         it 'will return lowest number of goals a particular team has scored in a single game.' do 
-          expect(stat_tracker.fewest_goals_scored("3")).to eq(0)
           expect(stat_tracker.fewest_goals_scored("3")).to be_a(Integer)
+          expect(stat_tracker.fewest_goals_scored("3")).to eq(0)
         end
       end
 
       describe "#favorite_opponent" do 
         it 'will return the name of the opponent that has the lowest win percentage against the given team.' do 
-          expect(stat_tracker.favorite_opponent("3")).to eq("Portland Timbers")
           expect(stat_tracker.favorite_opponent("3")).to be_a(String)
+          expect(stat_tracker.favorite_opponent("3")).to eq("Portland Timbers")
         end
       end
 
       describe "#rival" do 
         it 'will return the name of the opponent that has the highest win percentage against the given team.' do 
-          expect(stat_tracker.rival("3")).to eq("FC Dallas")
           expect(stat_tracker.rival("3")).to be_a(String)
+          expect(stat_tracker.rival("3")).to eq("FC Dallas")
+        end
+      end
+
+      describe '#biggest_team_blowout' do
+        it '#will return the biggest difference between team goals and opponent goals for a win for a given team' do
+          expect(stat_tracker.biggest_team_blowout("6")).to be_a(Integer)
+          expect(stat_tracker.biggest_team_blowout("6")).to eq()
+        end
+      end
+
+      describe '#worst_loss' do
+        it 'will return the biggest difference between team goal sand opponent goals for a loss for the given team' do
+          expect(stat_tracker.worst_loss("6")).to be_a(Integer)
+          expect(stat_tracker.worst_loss("6")).to eq()
+        end
+      end
+
+      describe '#head_to_head' do
+        it 'will record as a win/loss percentage against all opponents as a hash' do
+          expect(stat_tracker.head_to_head("6")).to be_a(Hash)
+          expect(stat_tracker.head_to_head("6")).to eq()
+        end
+      end
+
+      describe '#seasonal_summary' do
+        it 'will return a hash of two hashes with data related to a summary of the season' do
+          expect(stat_tracker.seasonal_summary("6")).to be_a(Hash)
+          expect(stat_tracker.seasonal_summary("6")).to eq()
         end
       end
     end
