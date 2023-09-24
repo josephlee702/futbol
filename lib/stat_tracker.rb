@@ -11,6 +11,9 @@ class StatTracker
     @teams = content[:teams]
     @games = content[:games]
     @game_teams = content[:game_teams]
+    @teams_h = content[:teams_h]
+    @games_h = content[:games_h]
+    @game_teams_h = content[:game_teams_h]
   end
 
   def self.from_csv(locations)
@@ -18,11 +21,18 @@ class StatTracker
     teams_arry = CSV.readlines(locations[:teams], headers: true, header_converters: :symbol).map { |team| Team.new(team) }
     games_arry = CSV.readlines(locations[:games], headers: true, header_converters: :symbol).map { |game| Game.new(game) }
     game_teams_arry = CSV.readlines(locations[:game_teams], headers: true, header_converters: :symbol).map { |game_team| GameTeam.new(game_team)}
+    # make hashes
+    teams_hash = CSV.readlines(locations[:teams], headers: true, header_converters: :symbol).map { |team| [team[:team_id], Team.new(team)] }.to_h
+    games_hash = CSV.readlines(locations[:games], headers: true, header_converters: :symbol).map { |game| [game[:game_id], Game.new(game)] }.to_h
+    game_teams_hash = CSV.readlines(locations[:game_teams], headers: true, header_converters: :symbol).map { |game_team| [game_team[:game_id], GameTeam.new(game_team)] }.to_h
     # combine all arrays to be stored in a Hash so we can easily call each array
     contents = {
       teams: teams_arry,
       games: games_arry,
-      game_teams: game_teams_arry
+      game_teams: game_teams_arry,
+      teams_h: teams_hash,
+      games_h: games_hash,
+      game_teams_h: game_teams_hash
     }
     # pass contents hash on to StatTracker to initiate the class.
     StatTracker.new(contents)
@@ -426,6 +436,113 @@ class StatTracker
     tackles_by_team.find { |team, tackles| tackles == fewest_tackles}.first
   end
 
+  #Team Statistic Methods
+  def team_info(team_id)
+    team_info = Hash.new(0)
+    team = @teams.find { |team| team.team_id == team_id}
+    team_info["team_id"] = team.team_id
+    team_info["franchise_id"] = team.franchise_id
+    team_info["team_name"] = team.name
+    team_info["abbreviation"] = team.abbreviation
+    team_info["link"] = team.link
+    team_info
+  end
+
+  def best_season(team_id)
+    season_win_percentages = Hash.new(0)
+    #this gives all the games that the team was part of
+    season_games = @game_teams.find_all { |game| team_id == game.team_id }
+    #this gives an array of all game ids they played
+    season_games = season_games.map do |game|
+      game.game_id
+    end
+    #find all the wins of a team in a season
+    total_wins = Hash.new(0)
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && game_team.result == "WIN" && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+            total_wins[game.season] += 1
+          end
+        end
+      end
+    end
+    #find the total games a team played in a season
+    total_games = Hash.new(0)
+    games_played = 0
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+          total_games[game.season] += 1
+          end
+        end
+      end
+    end
+    #now we have to divide the wins by total games played in a season
+    team_win_percentage_by_season = {}
+    total_wins.each do |season, wins|
+      team_win_percentage_by_season[season] = (wins.to_f / total_games[season].to_f)
+    end
+    index = team_win_percentage_by_season.values.max
+    season_most_wins = team_win_percentage_by_season.key(index).to_s
+  end
+
+  def worst_season(team_id)
+    season_win_percentages = Hash.new(0)
+    #this gives all the games that the team was part of
+    season_games = @game_teams.find_all { |game_team| team_id == game_team.team_id }
+    #this gives an array of all game ids they played
+    season_games = season_games.map do |game_team|
+      game_team.game_id
+    end
+    #find all the wins of a team in a season
+    total_wins = Hash.new(0)
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && game_team.result == "WIN" && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+            total_wins[game.season] += 1
+          end
+        end
+      end
+    end
+    #find the total games a team played in a season
+    total_games = Hash.new(0)
+    games_played = 0
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+          total_games[game.season] += 1
+          end
+        end
+      end
+    end
+    #now we have to divide the wins by total games played in a season
+    team_win_percentage_by_season = {}
+    total_wins.each do |season, wins|
+      team_win_percentage_by_season[season] = (wins.to_f / total_games[season].to_f)
+    end
+    index = team_win_percentage_by_season.values.min
+    season_least_wins = team_win_percentage_by_season.key(index).to_s
+  end
+
+  def average_win_percentage(team_id)
+    game_wins = 0
+    total_games = 0
+    @game_teams.each do |game_team| 
+      if team_id == game_team.team_id && game_team.result == "WIN"
+        game_wins += 1
+      end
+      if team_id == game_team.team_id 
+        total_games += 1
+      end
+    end
+    average_win_percentage = (game_wins.to_f / total_games.to_f).round(2)
+    average_win_percentage
+  end
+
   def most_goals_scored(team_id)
     team_games = @game_teams.find_all do |game|
       game.team_id == team_id
@@ -505,4 +622,62 @@ class StatTracker
     rival = opponent_win_percentage.find { |team, wins| wins == opponent_win_percentage.values.max }
     rival.first
   end
+
+  def biggest_team_blowout(team_id)
+    #Biggest difference between team goals and opponent goals for a win for the given team.	Integer
+    goal_differences = []
+    team_wins = @game_teams.find_all {|game| game.team_id == team_id && game.result == "WIN"}
+
+    team_wins.each do |game|
+      goal_differences << (@games_h[game.game_id].away_goals - @games_h[game.game_id].home_goals).abs 
+    end
+
+    goal_differences.max
+  end
+
+  def worst_loss(team_id)
+    goal_differences = []
+    team_losses = @game_teams.find_all {|game| game.team_id == team_id && game.result == "LOSS"}
+
+    team_losses.each do |game|
+      game_stats = @games_h[game.game_id]
+      goal_differences << (game_stats.away_goals - game_stats.home_goals).abs 
+    end
+
+    goal_differences.max
+  end
+
+  def head_to_head(team_id)
+    head_to_head_stats = Hash.new{|h,k| h[k] = Hash.new(0)}
+    games = @game_teams.find_all { |game| game.team_id == team_id }
+    games.each do |game|
+      game_stats = @games_h[game.game_id]
+      opponent = game.hoa == "away" ? game_stats.home_team_id : game_stats.away_team_id
+      opponent_name = @teams_h[opponent].name
+      win = game.result == "WIN" ? 1 : 0
+
+      if head_to_head_stats.keys.include?(opponent_name)
+        head_to_head_stats[opponent_name][:wins] += win
+        head_to_head_stats[opponent_name][:total_games] += 1
+      else
+        head_to_head_stats[opponent_name] = {
+          :wins => win,
+          :total_games => 1
+        }
+      end
+    end
+
+    head_to_head_stats_final = {}
+    head_to_head_stats.each do |opponent, stats|
+      head_to_head_stats_final[opponent] = (stats[:wins].to_f / stats[:total_games].to_f).round(2)
+    end
+    head_to_head_stats_final
+  end
+
+  # def seasonal_summary(team_id)
+  #   #For each season that the team has played, a hash that has two keys (:regular_season and :postseason), that each point to a hash with the following keys: :win_percentage, :total_goals_scored, :total_goals_against, :average_goals_scored, :average_goals_against. #Hash
+    
+  # end
 end
+
+

@@ -19,3 +19,18 @@ https://docs.google.com/document/d/1NUJcmA-vbEgt1MOEZ9AMtp8D0DJWoKYct48TbbfzKg4/
 ## Xander Hendry, Joseph Lee, Nathan Trautenberg
 ### LinkedIn accounts:https://www.linkedin.com/in/xander-hendry-70b804289/, https://www.linkedin.com/in/joseph-lee702/, https://www.linkedin.com/in/nathan-trautenberg-9106271a7/
 ### Github links: https://github.com/XanderHendry, https://github.com/josephlee702, https://github.com/WagglyDessert
+
+# RETRO
+
+# We just used Google Docs.
+# https://docs.google.com/document/d/12iH9Rf_1ScHY1uKHZnK0UDeeoQb5OTHdtU_u67X07r8/edit?usp=sharing
+
+# Top 3 Things That We Did Well
+1. Knowledge transfer was superb. We took the time to teach each other techniques and made sure that we got the practice in to do them well.
+2. Group debugging was always a smooth, productive process that saved us a lot of time, as well as helped us learn different ways to approaching bugs and resolving them.
+3. Divvying up the tasks and diving in was good. Aka our workflow (working as a group, as well as in pairs and solo.)
+
+# Top 3 Things We Would Do Differently
+1. We would use a different project management tool. GitHub Projects was severely lacking in functionality compared to other tools that we have used in the past before. For example, there is a bug where you cannot convert a draft issue into a real issue, or even see the repo that you are trying to link into.
+2. We can take more poms. We had long sessions of straight coding and debugging, and we ended up melting our brains and lacking productivity the day after.
+3. Commit more frequently after each method. 
