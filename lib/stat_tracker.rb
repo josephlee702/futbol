@@ -505,4 +505,27 @@ class StatTracker
     rival = opponent_win_percentage.find { |team, wins| wins == opponent_win_percentage.values.max }
     rival.first
   end
+
+  def biggest_team_blowout(team_id)
+    #Biggest difference between team goals and opponent goals for a win for the given team.	Integer
+    @games.each do |game|
+      if team_id == game.team_id
+    end
+  end
+
+  def worst_loss(team_id)
+    #Biggest difference between team goals and opponent goals for a loss for the given team. Integer
+
+  end
+
+  def head_to_head(team_id)
+    #Record (as a hash - win/loss) against all opponents with the opponents’ names as keys and the win percentage against that opponent as a value.	#Hash
+
+  end
+
+  def seasonal_summary(team_id)
+    #For each season that the team has played, a hash that has two keys (:regular_season and :postseason), that each point to a hash with the following keys: :win_percentage, :total_goals_scored, :total_goals_against, :average_goals_scored, :average_goals_against. #Hash
+
+  end
+end
 end
