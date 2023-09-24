@@ -74,5 +74,25 @@ def offensable
     coach_win_percentage
   end
 
+  def accuratable(season)
+    accuracy_by_team = {}
+    #sets team names to keys
+    @teams.each do |team|
+      season_games = season_game_idables(season)
+      goals = 0
+      shots = 0
+      @game_teams.each do |game_team|
+        if season_games.include?(game_team.game_id) && game_team.team_id == team.team_id
+          goals += game_team.goals
+          shots += game_team.shots
+        end
+      end
+      if goals > 0 && shots > 0
+        accuracy_by_team[team.name] = (goals.to_f/shots.to_f)
+      end
+    end
+    accuracy_by_team
+  end
+
 end
 
