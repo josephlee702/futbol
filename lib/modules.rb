@@ -94,5 +94,71 @@ def offensable
     accuracy_by_team
   end
 
+  def tacklable(season)
+    tackles_by_team = {}
+    @teams.each do |team|
+      season_games = season_game_idables(season)
+      tackles = 0
+      @game_teams.each do |game_team|
+        if season_games.include?(game_team.game_id) && game_team.team_id == team.team_id
+          tackles += game_team.tackles
+        end
+      end
+      if tackles > 0
+        tackles_by_team[team.name] = tackles
+      end
+    end
+    tackles_by_team
+  end
+
+  def seasonable(team_id)
+    season_win_percentages = Hash.new(0)
+    #this gives all the games that the team was part of
+    season_games = @game_teams.find_all { |game_team| team_id == game_team.team_id }
+    #this gives an array of all game ids they played
+    season_games = season_games.map do |game_team|
+      game_team.game_id
+    end
+    #find all the wins of a team in a season
+    total_wins = Hash.new(0)
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && game_team.result == "WIN" && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+            total_wins[game.season] += 1
+          end
+        end
+      end
+    end
+    #find the total games a team played in a season
+    total_games = Hash.new(0)
+    games_played = 0
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && season_games.include?(game_team.game_id)
+        @games.each do |game|
+          if game.game_id == game_team.game_id
+          total_games[game.season] += 1
+          end
+        end
+      end
+    end
+    #now we have to divide the wins by total games played in a season
+    team_win_percentage_by_season = {}
+    total_wins.each do |season, wins|
+      team_win_percentage_by_season[season] = (wins.to_f / total_games[season].to_f)
+    end
+    team_win_percentage_by_season
+  end
+
+  def goals_scorable(team_id)
+    team_games = @game_teams.find_all do |game|
+      game.team_id == team_id
+    end
+    team_game_goals = team_games.map do |game|
+      game.goals
+    end
+    team_game_goals
+  end
+
 end
 
