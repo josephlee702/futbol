@@ -126,8 +126,8 @@ RSpec.describe StatTracker do
   context 'Season Statistic Methods' do
     describe "#season_game_ids" do 
       it 'will find all game ids for the given season' do 
-        expect(stat_tracker.season_game_ids("20152016")).to be_a(Array)
-        expect(stat_tracker.season_game_ids("20152016")).to eq(["2015030141", "2015030142", "2015030143", "2015030144", "2015030145", "2015030181"])
+        expect(stat_tracker.season_game_idables("20152016")).to be_a(Array)
+        expect(stat_tracker.season_game_idables("20152016")).to eq(["2015030141", "2015030142", "2015030143", "2015030144", "2015030145", "2015030181"])
       end
     end
     describe "#winningest_coach" do 
