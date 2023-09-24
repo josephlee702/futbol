@@ -508,24 +508,47 @@ class StatTracker
 
   def biggest_team_blowout(team_id)
     #Biggest difference between team goals and opponent goals for a win for the given team.	Integer
-    @games.each do |game|
-      if team_id == game.team_id
+    goal_differences = []
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && game_team.result == "WIN"
+        @games.each do |game|
+          if game_team.game_id == game.game_id
+            goal_differences << (game.away_goals - game.home_goals).abs
+          end
+        end
+      end
+    end
+    if goal_differences == []
+      0
+    else
+      goal_differences.max
     end
   end
 
   def worst_loss(team_id)
     #Biggest difference between team goals and opponent goals for a loss for the given team. Integer
-
+    goal_differences = []
+    @game_teams.each do |game_team|
+      if team_id == game_team.team_id && game_team.result == "LOSS"
+        @games.each do |game|
+          if game_team.game_id == game.game_id
+            goal_differences << (game.away_goals - game.home_goals).abs
+          end
+        end
+      end
+    end
+    if goal_differences == []
+      0
+    else
+      goal_differences.max
+    end
   end
 
   def head_to_head(team_id)
     #Record (as a hash - win/loss) against all opponents with the opponents’ names as keys and the win percentage against that opponent as a value.	#Hash
-
   end
 
   def seasonal_summary(team_id)
     #For each season that the team has played, a hash that has two keys (:regular_season and :postseason), that each point to a hash with the following keys: :win_percentage, :total_goals_scored, :total_goals_against, :average_goals_scored, :average_goals_against. #Hash
-
   end
-end
 end
